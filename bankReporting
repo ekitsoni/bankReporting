@@ -1,0 +1,309 @@
+package bankreporting;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+public class BankReporting {
+
+    public static class Bank{
+        
+        private String name;
+        private List<Branch> branches = new ArrayList<Branch>();
+        private List<Customer> customers = new ArrayList<Customer>();
+        
+        Bank(String name){ 
+            this.name = name; 
+        }
+        
+        void setName(String name){
+            this.name = name;
+        }
+        
+        String getName(){
+            return name;
+        }
+        
+        void addBranch(Branch branch){
+            branches.add(branch);
+        }
+        
+        void removeBranch(Branch branch){
+            branches.remove(branch);
+        }
+        
+        void addCustomer(Customer customer){
+            customers.add(customer);
+        }
+        
+        void removeCustomer(Customer customer){
+            customers.remove(customer);
+        }
+        
+        void printCustomers(){
+            for( int i=0; i<customers.size(); i++){
+                System.out.println("Customer No " + (i+1) + "\n");
+                customers.get(i).printInfo();
+            }
+        }
+    }
+    
+    public static class Branch{
+        
+        private String name;
+        
+        Branch(String name){
+            this.name = name;
+        }
+        
+        void setName(String name){
+            this.name = name;
+        }
+        
+        String getName(){
+            return name;
+        }
+    }
+    
+    public static class Customer{
+        
+        private String firstName;
+        private String lastName;
+        private String email;
+        private List<SavingsAccount> savingsAccounts = new ArrayList<SavingsAccount>();
+        private List<CheckingAccount> checkingAccounts = new ArrayList<CheckingAccount>();
+        
+        Customer(String firstName, String lastName, String email){
+            
+            this.firstName = firstName;
+            this.lastName = lastName;
+            if( validEmail(email) == true )
+                this.email = email;
+            else
+                System.out.println("The email for customer " + firstName + " " + lastName + " is not valid.\n");
+        }
+        
+        void setFirstName(String firstName){
+            this.firstName = firstName;
+        }
+        
+        String getFirstName(){
+            return firstName;
+        }
+        
+        void setLastName(String lastName){
+            this.lastName = lastName;
+        }
+        
+        String getLastName(){
+            return lastName;
+        }
+        
+        void setEmail(String email){
+            this.email = email;
+        }
+        
+        String getEmail(){
+            return email;
+        }
+        
+        List<SavingsAccount> getSavingsAccounts(){
+            return savingsAccounts;
+        }
+        
+        List<CheckingAccount> getCheckingAccounts(){
+            return checkingAccounts;
+        }
+        
+        void addSavingsAccount(SavingsAccount account){
+            savingsAccounts.add(account);
+        }
+        
+        void removeSavingsAccount(SavingsAccount account){
+            savingsAccounts.remove(account);
+        }
+        
+        void addCheckingAccount(CheckingAccount account){
+            checkingAccounts.add(account);
+        }
+        
+        void removeCheckingAccount(CheckingAccount account){
+            checkingAccounts.remove(account);
+        }
+        
+        void printInfo(){
+            System.out.println("First NAme: " + firstName + "\nLast Name: " + lastName + "\nEmail: " + email + "\n");
+        }
+        
+        void printAllAcccounts(){
+            
+            for( int i=0; i<savingsAccounts.size(); i++){
+                System.out.println("Savings Account No " + (i+1) + "\n");
+                savingsAccounts.get(i).printAllInfo();
+            }
+            
+            for( int i=0; i<checkingAccounts.size(); i++){
+                System.out.println("Checking Account No " + (i+1) + "\n");
+                checkingAccounts.get(i).printAllInfo();
+            }
+            
+        }
+        
+        boolean validEmail(String givenEmail){
+            
+            int atExists = 0;
+            int dotExists = 0;
+            int atPos = 0;
+            int dotPos = 0;
+            
+            for (int i = 0; i < givenEmail.length(); i++){
+                
+                if (givenEmail.charAt(i) == '@'){
+                    atExists++;
+                    atPos = i;
+                }
+                if (givenEmail.charAt(i) == '.'){
+                    dotExists++;
+                    dotPos = i;
+                }
+            }
+            
+            if (atExists == 1 && dotExists == 1)
+                if (atPos < (dotPos - 1))
+                    if (atPos > 0 && dotPos < givenEmail.length()-1)
+                        return true;
+                
+            return false;
+        }
+    }
+    
+    public static class Account{
+        
+        private int accountNumber;
+        private float balance;
+        private String creationDate;
+        
+        void setAccountNumber(int accountNumber){
+            this.accountNumber = accountNumber;
+        }
+        
+        int getAccountNumber(){
+            return accountNumber;
+        }
+        
+        void setBalance(float balance){
+            this.balance = balance;
+        }
+        
+        float getBalance(){
+            return balance;
+        }
+        
+        void setCreationDate(String creationDate){
+            this.creationDate = creationDate;
+        }
+        
+        String getCreationDate(){
+            return creationDate;
+        }
+        
+        void printAllInfo(){
+            System.out.println("Account Number: " + accountNumber + "\nBalance: " + balance + "\nCreation Date: " + creationDate + "\n");
+        }
+    }
+    
+    public static class SavingsAccount extends Account{
+
+        SavingsAccount(int accountNumber, float balance, String creationDate){
+            setAccountNumber(accountNumber);
+            setBalance(balance);
+            setCreationDate(creationDate);
+        }
+        
+        void addInterest(){
+            
+            String today =new SimpleDateFormat("dd/MM/yyyy").format(new Date());
+            
+            DateTimeFormatter df = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            LocalDate  d1 = LocalDate.parse(getCreationDate(), df);
+            LocalDate  d2 = LocalDate.parse(today, df);
+
+            // calculating month difference
+            Long monthsBetween = ChronoUnit.MONTHS.between(d1,d2);
+            
+            float amount;
+            
+            if (monthsBetween < 2)
+                amount = 5*100/getBalance();
+            else if (monthsBetween >= 2 && monthsBetween < 4)
+                amount = 10*100/getBalance();
+            else
+                amount = 12*100/getBalance();
+            
+            setBalance(getBalance() + amount);
+        }
+    }
+    
+    public static class CheckingAccount extends Account{
+        
+        CheckingAccount(int accountNumber, float balance, String creationDate){
+            setAccountNumber(accountNumber);
+            setBalance(balance);
+            setCreationDate(creationDate);
+        }
+        
+        void deposit(float amount){
+            setBalance(getBalance() + amount);
+        }
+        void withdraw(float amount){
+            
+            if (getBalance() >= amount)
+                setBalance(getBalance() - amount);
+            else
+                System.out.println("Your balance is not enough for the transaction.\n");
+        }
+    }
+    
+    public static void main(String[] args) throws ParseException {
+        
+        Bank bank = new Bank("Test Bank");
+        Branch branch = new Branch("Test Bank Kifissia branch");
+        Customer customer = new Customer("John", "Doe", "johndoe@");
+        String today =new SimpleDateFormat("dd/MM/yyyy").format(new Date());
+        SavingsAccount savingsAccount1 = new SavingsAccount(1, 200, today);
+        CheckingAccount checkingAccount1 = new CheckingAccount(2, 145, today); 
+        CheckingAccount checkingAccount2 = new CheckingAccount(3, 160, today);
+        
+        bank.addBranch(branch);
+        bank.addCustomer(customer);
+        
+        customer.addSavingsAccount(savingsAccount1);
+        customer.addCheckingAccount(checkingAccount1);
+        customer.addCheckingAccount(checkingAccount2);
+        
+        customer.printAllAcccounts();
+        
+        customer.getCheckingAccounts().get(0).deposit(20);
+        customer.getCheckingAccounts().get(0).withdraw(180);
+        customer.getCheckingAccounts().get(0).withdraw(150);
+        
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        customer.getSavingsAccounts().get(0).setCreationDate(df.format(LocalDateTime.now().minusMonths(4))); // minus 4 months to test the interest
+        customer.getSavingsAccounts().get(0).addInterest();
+        
+        customer.removeCheckingAccount(checkingAccount2);
+        customer.setEmail("johndoe@gmail.com");
+        
+        customer.printAllAcccounts();
+        
+        bank.printCustomers();
+        
+    }
+    
+}
